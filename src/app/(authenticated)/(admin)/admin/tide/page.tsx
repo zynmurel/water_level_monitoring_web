@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { TrendingUp, CalendarIcon, Clock } from "lucide-react"
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -19,38 +19,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { addMinutes, format, isWithinInterval, parseISO, subMinutes, subHours, subDays, addDays } from "date-fns"
+import { format, isWithinInterval, parseISO, subDays, addMinutes, startOfDay, endOfDay } from "date-fns"
 import { DateRange } from "react-day-picker"
 import { cn } from "@/lib/utils"
+import { api } from "@/trpc/react"
 
-interface ChartDataItem {
+export type ChartDataItem = {
   id: number
   value: number
-  createdAt: string
-  updatedAt: string
+  createdAt: Date
+  updatedAt: Date,
+  label: 'High' | 'Low';
 }
 
 type TimeInterval = "5m" | "10m" | "15m" | "30m" | "1h" | "24h" | "1d"
-
-const generateChartData = (count: number, interval: TimeInterval): ChartDataItem[] => {
-  const now = new Date()
-  const intervalMinutes = {
-    "5m": 5,
-    "10m": 10,
-    "15m": 15,
-    "30m": 30,
-    "1h": 60,
-    "24h": 1440,
-    "1d": 1440
-  }[interval]
-
-  return Array.from({ length: count }, (_, index) => ({
-    id: index + 1,
-    value: Math.floor(Math.random() * 1000),
-    createdAt: format(subMinutes(now, (count - 1 - index) * intervalMinutes), "yyyy-MM-dd'T'HH:mm:ssXXX"),
-    updatedAt: format(subMinutes(now, (count - 1 - index) * intervalMinutes), "yyyy-MM-dd'T'HH:mm:ssXXX"),
-  }))
-}
 
 const chartConfig = {
   value: {
@@ -59,69 +41,82 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
+const getIntervalMinutes = (interval: TimeInterval): number => {
+  switch (interval) {
+    case "5m": return 5
+    case "10m": return 10
+    case "15m": return 15
+    case "30m": return 30
+    case "1h": return 60
+    case "24h": return 24 * 60
+    case "1d": return 24 * 60
+    default: return 5
+  }
+}
+
+
+
 export default function ValueOverTimeChart() {
-  const [timeInterval, setTimeInterval] = useState<TimeInterval>("5m")
-  const [chartData, setChartData] = useState<ChartDataItem[]>([])
-  const [date, setDate] = useState<DateRange | undefined>({
+  const defaultDate = {
     from: subDays(new Date(), 5),
     to: new Date(),
-  })
+  }
+  const [timeInterval, setTimeInterval] = useState<TimeInterval>("5m")
+  const [date, setDate] = useState<DateRange | undefined>(defaultDate)
   const [filteredData, setFilteredData] = useState<ChartDataItem[]>([])
   const [totalValue, setTotalValue] = useState(0)
 
-  useEffect(() => {
-    const dataCount = {
-      "5m": 12,
-      "10m": 6,
-      "15m": 4,
-      "30m": 2,
-      "1h": 1,
-      "24h": 24,
-      "1d": 24
-    }[timeInterval]
+  const { data: sensorData, isLoading, error } = api.water.getWaterSensorData.useQuery<ChartDataItem[]>({
+    from: date?.from ? startOfDay(date.from) : startOfDay(defaultDate.from),
+    to: date?.to ? endOfDay(date.to) : endOfDay(defaultDate.to),
+  }, {
+    enabled: !!date?.from && !!date?.to, 
+  })
 
-    const newChartData = generateChartData(dataCount, timeInterval)
-    setChartData(newChartData)
 
-    const now = new Date()
-    let startDate: Date
+const processedData = useMemo(() => {
+  if (!sensorData || !date?.from || !date?.to) return [];
 
-    switch (timeInterval) {
-      case "5m":
-      case "10m":
-      case "15m":
-      case "30m":
-      case "1h":
-        startDate = subHours(now, 1)
-        break
-      case "24h":
-        startDate = subDays(now, 1)
-        break
-      case "1d":
-        startDate = subDays(now, 1)
-        break
-    }
+  const intervalMinutes = getIntervalMinutes(timeInterval);
+  const result: ChartDataItem[] = [];
+  let currentTime = new Date(date.from);
+  const endTime = new Date(date.to);
 
-    setDate({ from: startDate, to: now })
-  }, [timeInterval])
-
-  useEffect(() => {
-    if (date?.from && date?.to && chartData.length > 0) {
-      const filtered = chartData.filter((item) => {
-        const itemDate = parseISO(item.createdAt)
-        return isWithinInterval(itemDate, { start: date.from!, end: date.to! })
+  while (currentTime <= endTime) {
+    const nextTime = addMinutes(currentTime, intervalMinutes);
+    const dataInInterval = sensorData.filter(item => 
+      isWithinInterval(new Date(item.createdAt), {
+        start: currentTime,
+        end: nextTime
       })
-      setFilteredData(filtered)
+    );
 
-      const total = filtered.reduce((sum, item) => sum + item.value, 0)
-      setTotalValue(total)
+    if (dataInInterval.length > 0) {
+      const averageValue = dataInInterval.reduce((sum, item) => sum + item.value, 0) / dataInInterval.length;
+      result.push({
+        id: currentTime.getTime(),
+        value: Number(averageValue.toFixed(2)),
+        createdAt: new Date(currentTime),
+        updatedAt: new Date(currentTime),
+        label: averageValue === 1 ? 'High' : 'Low' 
+      });
     }
-  }, [date, chartData])
+
+    currentTime = nextTime;
+  }
+
+  return result;
+}, [sensorData, date, timeInterval]);
+  useEffect(() => {
+    setFilteredData(processedData)
+    const total = processedData.reduce((sum, item) => sum + item.value, 0)
+    setTotalValue(Number(total.toFixed(2)))
+  }, [processedData])
 
   return (
     <Card className="w-full max-w-3xl">
       <CardHeader>
-        <CardTitle>Value Over Time Chart</CardTitle>
+        <CardTitle>Tide Flow Chart</CardTitle>
         <CardDescription>Showing total value for the selected time interval</CardDescription>
       </CardHeader>
       <CardContent>
@@ -140,11 +135,10 @@ export default function ValueOverTimeChart() {
                 {date?.from ? (
                   date.to ? (
                     <>
-                      {format(date.from, "LLL dd, y HH:mm")} -{" "}
-                      {format(date.to, "LLL dd, y HH:mm")}
+                      {format(date.from, "LLL dd, y")} - {format(date.to, "LLL dd, y")}
                     </>
                   ) : (
-                    format(date.from, "LLL dd, y HH:mm")
+                    format(date.from, "LLL dd, y")
                   )
                 ) : (
                   <span>Pick a date range</span>
@@ -158,7 +152,7 @@ export default function ValueOverTimeChart() {
                 defaultMonth={date?.from}
                 selected={date}
                 onSelect={setDate}
-                numberOfMonths={1}
+                numberOfMonths={2}
               />
             </PopoverContent>
           </Popover>
@@ -175,6 +169,7 @@ export default function ValueOverTimeChart() {
               <SelectItem value="15m">Every 15 minutes</SelectItem>
               <SelectItem value="30m">Every 30 minutes</SelectItem>
               <SelectItem value="1h">Every 1 hour</SelectItem>
+              <SelectItem value="24h">Every 24 hours</SelectItem>
               <SelectItem value="1d">Daily</SelectItem>
             </SelectContent>
           </Select>
@@ -182,7 +177,6 @@ export default function ValueOverTimeChart() {
         <ChartContainer config={chartConfig}>
           <ResponsiveContainer width="100%" height={400}>
             <AreaChart
-              accessibilityLayer
               data={filteredData}
               margin={{
                 top: 10,
@@ -194,9 +188,14 @@ export default function ValueOverTimeChart() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
                 dataKey="createdAt"
-                tickFormatter={(value) => format(parseISO(value), "HH:mm")}
+                tickFormatter={(value) => format(new Date(value), "MMM dd, HH:mm")}
               />
-              <YAxis />
+             <YAxis
+                  tickFormatter={(value) => {
+                    return value > 0 ? 'High' : 'Low';
+                  }}
+                  tickCount={2}
+                />
               <ChartTooltip
                 content={<ChartTooltipContent />}
               />

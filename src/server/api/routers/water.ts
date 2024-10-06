@@ -24,16 +24,48 @@ createFlowData: publicProcedure
     }),
 
 getFloatData: publicProcedure
-    .query(({ input, ctx }) => {
-      return ctx.db.floatSensor.findMany({orderBy: {
-        createdAt: 'asc'
-      }, })
+    .input(z.object({
+      from: z.date().optional(),
+      to: z.date().optional(),
+    }))
+    .query(async ({ input, ctx }) => {
+      
+      if (input.from && input.to && input.from > input.to) {
+        throw new Error("The 'from' date must be less than or equal to the 'to' date.");
+      }
+  
+      return ctx.db.floatSensor.findMany({
+        where: {
+          ...(input.from && { createdAt: { gte: input.from } }),
+          ...(input.to && { createdAt: { lte: input.to } }),
+        },
+        orderBy: {
+          createdAt: 'asc',
+        },
+      });
     }),
-    
+  
 getWaterSensorData: publicProcedure
-    .query(({ input, ctx }) => {
-      return ctx.db.waterFlowSensor.findMany({orderBy: {
-        createdAt: 'asc'
-      }, })
-    })
+    .input(z.object({
+      from: z.date(),
+      to: z.date(),
+    }))
+    .query(async ({ input, ctx }) => {
+        
+      if (input.from > input.to) {
+        throw new Error("The 'from' date must be less than or equal to the 'to' date.");
+      }
+
+      return ctx.db.waterFlowSensor.findMany({
+        where: {
+          createdAt: {
+            lte: input.to,
+            gte: input.from,
+          },
+        },
+        orderBy: {
+          createdAt: 'asc',
+        },
+      });
+    }),
 });
