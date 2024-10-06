@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { addMinutes, format, isWithinInterval, parseISO, subMinutes, subHours, subDays } from "date-fns"
+import { addMinutes, format, isWithinInterval, parseISO, subMinutes, subHours, subDays, addDays } from "date-fns"
 import { DateRange } from "react-day-picker"
 import { cn } from "@/lib/utils"
 
@@ -60,9 +60,12 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export default function ValueOverTimeChart() {
-  const [timeInterval, setTimeInterval] = useState<TimeInterval>("1h")
+  const [timeInterval, setTimeInterval] = useState<TimeInterval>("5m")
   const [chartData, setChartData] = useState<ChartDataItem[]>([])
-  const [date, setDate] = useState<DateRange | undefined>(undefined)
+  const [date, setDate] = useState<DateRange | undefined>({
+    from: subDays(new Date(), 5),
+    to: new Date(),
+  })
   const [filteredData, setFilteredData] = useState<ChartDataItem[]>([])
   const [totalValue, setTotalValue] = useState(0)
 
@@ -172,7 +175,6 @@ export default function ValueOverTimeChart() {
               <SelectItem value="15m">Every 15 minutes</SelectItem>
               <SelectItem value="30m">Every 30 minutes</SelectItem>
               <SelectItem value="1h">Every 1 hour</SelectItem>
-              <SelectItem value="24h">Every 24 hours</SelectItem>
               <SelectItem value="1d">Daily</SelectItem>
             </SelectContent>
           </Select>
