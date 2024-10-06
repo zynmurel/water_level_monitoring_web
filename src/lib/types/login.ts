@@ -1,4 +1,4 @@
 
-export type UserRoles = "super-admin" | "admin" | "instructor"  | "student"   | "company"
+export type UserRoles = "admin"
 
-export type CredentialsType = { username:string;  role:UserRoles ; id:number; department?:string, password?:string}
+export type CredentialsType = { username:string;  role:UserRoles ; id:number; password?:string}
