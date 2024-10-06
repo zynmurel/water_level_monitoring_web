@@ -7,7 +7,7 @@ type WithSelectors<S> = S extends { getState: () => infer T }
   : never;
 
 const createSelectors = <S extends UseBoundStore<StoreApi<object>>>(
-  _store: S
+  _store: S,
 ) => {
   const store = _store as WithSelectors<typeof _store>;
 
@@ -15,20 +15,18 @@ const createSelectors = <S extends UseBoundStore<StoreApi<object>>>(
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   for (const k of Object.keys(store.getState())) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable @typescript-eslint/no-explicit-any
     (store.use as any)[k] = () => store((s) => s[k as keyof typeof s], shallow);
   }
 
   return store;
 };
 
-const useStoreBase = create<
-  UserSlice 
->()(
+const useStoreBase = create<UserSlice>()(
   //persist(
   (...a) => ({
     ...createUserSlice(...a),
-  })
+  }),
 );
 
 export const useStore = createSelectors(useStoreBase);

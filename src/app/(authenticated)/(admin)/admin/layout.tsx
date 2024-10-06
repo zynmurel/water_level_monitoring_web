@@ -67,7 +67,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen flex-col">
       {/* <MostHeader /> */}
       <div className="grid h-full w-full flex-1 md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-        <div className="hidden border-r md:block">
+        <div className="hidden md:block">
           <SideNavigation routes={routes} />
         </div>
         <div className="flex flex-col">
@@ -99,7 +99,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </DropdownMenu>
             </div>
           </header>
-          <main className="flex flex-1 flex-col gap-4 bg-muted/80 p-4 dark:bg-muted/30 lg:gap-4 lg:p-6 xl:px-10">
+          <main className="flex flex-1 flex-col gap-4 bg-muted/80 bg-sky-50 p-4 dark:bg-muted/30 lg:gap-4 lg:p-6 xl:px-10">
             {children}
           </main>
         </div>
