@@ -73,26 +73,12 @@ export default function ContributorSetting() {
     }
   }
 
-  useEffect(() => {
-      const fetchUserSetting = async () =>  {
-       try {
-        // const {data} = await getUserSetting({}) as unknown as any;
-        // const userData: UserType = data;
-        // form.setValue('name', userData.name)
-        // form.setValue('username', userData.username)
-       } catch (error) {
-        console.log(error)
-       }
-      }
-      fetchUserSetting()
-  }, [])
-
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle>User Settings</CardTitle>
         <CardDescription>
-          Update your profile information and password here. Click save when you're done.
+         {` Update your profile information and password here. Click save when you're done.`}
         </CardDescription>
       </CardHeader>
       <CardContent>
