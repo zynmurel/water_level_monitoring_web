@@ -34,27 +34,27 @@ const routes = [
   {
     title: "Dashboard",
     route: "/admin",
-    icon: <LayoutDashboard className="h-4 w-4" />,
+    icon: <LayoutDashboard className="h-5 w-5" />,
   },
   {
-    title: "Tide Charts",
+    title: "Tide Chart",
     route: "/admin/tide",
-    icon: <ChartNoAxesCombined className="h-4 w-4" />,
+    icon: <ChartNoAxesCombined className="h-5 w-5" />,
   },
   {
-    title: "Water Flow Charts",
+    title: "Water Flow Chart",
     route: "/admin/flow",
-    icon: <Waves className="h-4 w-4" />,
+    icon: <Waves className="h-5 w-5" />,
   },
   {
     title: "Reports",
     route: "/admin/reports",
-    icon: <ChartColumnBig className="h-4 w-4" />,
+    icon: <ChartColumnBig className="h-5 w-5" />,
   },
   {
-    title: "Account",
+    title: "Settings",
     route: "/admin/account",
-    icon: <Settings className="h-4 w-4" />,
+    icon: <Settings className="h-5 w-5" />,
   },
 ];
 

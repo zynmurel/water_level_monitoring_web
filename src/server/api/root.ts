@@ -1,6 +1,8 @@
 import { postRouter } from "@/server/api/routers/post";
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 import { waterDataRouter } from "./routers/water";
+import { accountRouter } from "./routers/account";
+import { waterFlowRouter } from "./routers/flow";
 
 /**
  * This is the primary router for your server.
@@ -9,7 +11,9 @@ import { waterDataRouter } from "./routers/water";
  */
 export const appRouter = createTRPCRouter({
   post: postRouter,
-  water: waterDataRouter
+  water: waterDataRouter,
+  account: accountRouter,
+  waterFlow : waterFlowRouter
 });
 
 // export type definition of API

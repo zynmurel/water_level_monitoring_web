@@ -7,6 +7,9 @@ export type Payload = {
 
 export async function POST (request: NextRequest){
     const payload = await request.json() as Payload
-    const data = await api.water.createFlowData(payload)
+    console.log(payload, "hereeee")
+    const data = await api.water.createFlowData({
+        value:!Number.isNaN(payload.value)? payload.value : '0'
+    })
     return NextResponse.json(data);
 }
