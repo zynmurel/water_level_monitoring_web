@@ -1,119 +1,117 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useMemo } from "react"
-import { TrendingUp, CalendarIcon, Clock } from "lucide-react"
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { format, isWithinInterval, parseISO, subDays, addMinutes, startOfDay, endOfDay } from "date-fns"
-import { DateRange } from "react-day-picker"
-import { cn } from "@/lib/utils"
-import { api } from "@/trpc/react"
+import { useState, useEffect, useMemo } from "react";
+import { TrendingUp, CalendarIcon, Clock } from "lucide-react";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { format, isWithinInterval, addMinutes, startOfDay, endOfDay } from "date-fns";
+import { DateRange } from "react-day-picker";
+import { cn } from "@/lib/utils";
+import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 
 export type ChartDataItem = {
-  id: number
-  value: number
-  createdAt: Date
-  updatedAt: Date,
+  id: number;
+  value: number;
+  createdAt: Date;
+  updatedAt: Date;
   label: 'High' | 'Low';
-}
+};
 
-type TimeInterval = "5m" | "10m" | "15m" | "30m" | "1h" | "24h" | "1d"
+type TimeInterval = "5m" | "10m" | "15m" | "30m" | "1h" | "24h" | "1d";
 
 const chartConfig = {
   value: {
     label: "Value",
     color: "hsl(var(--chart-1))",
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
 const getIntervalMinutes = (interval: TimeInterval): number => {
   switch (interval) {
-    case "5m": return 5
-    case "10m": return 10
-    case "15m": return 15
-    case "30m": return 30
-    case "1h": return 60
-    case "24h": return 24 * 60
-    case "1d": return 24 * 60
-    default: return 5
+    case "5m": return 5;
+    case "10m": return 10;
+    case "15m": return 15;
+    case "30m": return 30;
+    case "1h": return 60;
+    case "24h": return 24 * 60;
+    case "1d": return 24 * 60;
+    default: return 5;
   }
-}
+};
+
 interface TideChartProps {
   mode: 'VIEW' | 'EDIT' | null;
 }
 
-const TideChart = (props: TideChartProps) => {
+const TideChart: React.FC<TideChartProps> = (props) => {
   const defaultDate = {
-    from: subDays(new Date(), 5),
+    from: new Date(),
     to: new Date(),
-  }
-  const [timeInterval, setTimeInterval] = useState<TimeInterval>("5m")
-  const [date, setDate] = useState<DateRange | undefined>(defaultDate)
-  const [filteredData, setFilteredData] = useState<ChartDataItem[]>([])
-  const [totalValue, setTotalValue] = useState(0)
+  };
+  const [timeInterval, setTimeInterval] = useState<TimeInterval>("1h");
+  const [date, setDate] = useState<DateRange | undefined>(defaultDate);
+  const [filteredData, setFilteredData] = useState<ChartDataItem[]>([]);
+  const [totalValue, setTotalValue] = useState(0);
 
   const router = useRouter();
   const { data: sensorData, isLoading, error } = api.water.getWaterSensorData.useQuery<ChartDataItem[]>({
-    from: date?.from ? startOfDay(date.from) : startOfDay(defaultDate.from),
-    to: date?.to ? endOfDay(date.to) : endOfDay(defaultDate.to),
+    from: startOfDay(date?.from || defaultDate.from),
+    to: endOfDay(date?.to || defaultDate.to),
   }, {
-    enabled: !!date?.from && !!date?.to, 
-  })
-
+    enabled: !!date?.from && !!date?.to,
+  });
 
   const handleNavigateTidePage = () => {
     router.push("/admin/tide");
   };
 
-    const processedData = useMemo(() => {
+  const processedData = useMemo(() => {
     if (!sensorData || !date?.from || !date?.to) return [];
 
     const intervalMinutes = getIntervalMinutes(timeInterval);
     const result: ChartDataItem[] = [];
-    let currentTime = new Date(date.from);
-    const endTime = new Date(date.to);
+    let currentTime = startOfDay(date.from);
+    const endTime = endOfDay(date.to);
 
     while (currentTime <= endTime) {
-        const nextTime = addMinutes(currentTime, intervalMinutes);
-        const dataInInterval = sensorData.filter(item => 
+      const nextTime = addMinutes(currentTime, intervalMinutes);
+      const dataInInterval = sensorData.filter(item =>
         isWithinInterval(new Date(item.createdAt), {
-            start: currentTime,
-            end: nextTime
+          start: currentTime,
+          end: nextTime
         })
-        );
+      );
 
-        if (dataInInterval.length > 0) {
+      if (dataInInterval.length > 0) {
         const averageValue = dataInInterval.reduce((sum, item) => sum + item.value, 0) / dataInInterval.length;
         result.push({
-            id: currentTime.getTime(),
-            value: Number(averageValue.toFixed(2)),
-            createdAt: new Date(currentTime),
-            updatedAt: new Date(currentTime),
-            label: averageValue === 1 ? 'High' : 'Low' 
+          id: currentTime.getTime(),
+          value: Number(averageValue.toFixed(2)),
+          createdAt: new Date(currentTime),
+          updatedAt: new Date(currentTime),
+          label: averageValue === 1 ? 'High' : 'Low'
         });
-        }
+      } else {
+        result.push({
+          id: currentTime.getTime(),
+          value: 0,
+          createdAt: new Date(currentTime),
+          updatedAt: new Date(currentTime),
+          label: 'Low'
+        });
+      }
 
-        currentTime = nextTime;
+      currentTime = nextTime;
     }
 
     return result;
-    }, [sensorData, date, timeInterval]);
+  }, [sensorData, date, timeInterval]);
   useEffect(() => {
     setFilteredData(processedData)
     const total = processedData.reduce((sum, item) => sum + item.value, 0)
@@ -124,9 +122,20 @@ const TideChart = (props: TideChartProps) => {
     <Card className="w-full max-w-3xl" >
       <CardHeader>
         <CardTitle>Tide Flow Chart</CardTitle>
-        <CardDescription>Showing total value for the selected time interval</CardDescription>
+        <CardDescription>
+          {
+            props.mode == 'VIEW' ? "Displaying today's tide status for real-time monitoring and analysis."
+            : "Showing total value for the selected time interval"
+          }
+        </CardDescription>
       </CardHeader>
       <CardContent >
+        {
+          props?.mode == 'VIEW' && 
+          <div className="pb-5 text-xl font-bold text-blue-500">
+              {format(new Date(), "PPPP")}
+            </div>
+        }
         <div className={`mb-4 flex items-center gap-4 ${props?.mode == 'VIEW' && 'hidden'}`} >
           <Popover>
             <PopoverTrigger asChild>
@@ -140,26 +149,18 @@ const TideChart = (props: TideChartProps) => {
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {date?.from ? (
-                  date.to ? (
-                    <>
-                      {format(date.from, "LLL dd, y")} - {format(date.to, "LLL dd, y")}
-                    </>
-                  ) : (
-                    format(date.from, "LLL dd, y")
-                  )
+                  format(date.from, "LLL dd, y")
                 ) : (
-                  <span>Pick a date range</span>
+                  <span>Pick a date</span>
                 )}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 initialFocus
-                mode="range"
-                defaultMonth={date?.from}
-                selected={date}
-                onSelect={setDate}
-                numberOfMonths={2}
+                mode="single"
+                selected={date?.from}
+                onSelect={(date) => setDate({ from: date, to: date })}
               />
             </PopoverContent>
           </Popover>
@@ -193,19 +194,21 @@ const TideChart = (props: TideChartProps) => {
               }}
             >
               <CartesianGrid strokeDasharray="3 3" />
+              <ChartTooltip content={<CustomTooltipContent />} />
+
               <XAxis
                 dataKey="createdAt"
                 tickFormatter={(value: string | number | Date) => {
-                    const dateValue = (typeof value === 'string' || typeof value === 'number') ? new Date(value) : value;
-                    return format(dateValue, "MMM dd, HH:mm");
+                  const dateValue = (typeof value === 'string' || typeof value === 'number') ? new Date(value) : value;
+                  return format(dateValue, "hh:mm a");
                 }}
-                />
-             <YAxis
-                  tickFormatter={(value) => {
-                    return value > 0 ? 'High' : 'Low';
-                  }}
-                  tickCount={2}
-                />
+              />
+              <YAxis
+                tickFormatter={(value) => {
+                  return value > 0 ? 'High' : 'Low';
+                }}
+                tickCount={2}
+              />
               <ChartTooltip
                 content={<ChartTooltipContent />}
               />
@@ -240,7 +243,20 @@ const TideChart = (props: TideChartProps) => {
         </div>
       </CardFooter>
     </Card>
-  )
-}
+  );
+};
 
-export default TideChart
+const CustomTooltipContent = ({ payload, label }: any) => {
+  if (payload && payload.length) {
+    return (
+      <div className="p-2">
+        <p className="text-sm font-bold">{`Date: ${format(label || new Date(), "PPP hh:mm aaa")}`}</p>
+        <p className="text-sm font-bold text-blue-500">{`${payload[0].payload.label}`}</p>
+      </div>
+    );
+  }
+
+  return null;
+};
+
+export default TideChart;
