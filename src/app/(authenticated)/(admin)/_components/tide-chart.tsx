@@ -23,6 +23,7 @@ import { format, isWithinInterval, parseISO, subDays, addMinutes, startOfDay, en
 import { DateRange } from "react-day-picker"
 import { cn } from "@/lib/utils"
 import { api } from "@/trpc/react"
+import { useRouter } from "next/navigation";
 
 export type ChartDataItem = {
   id: number
@@ -53,8 +54,11 @@ const getIntervalMinutes = (interval: TimeInterval): number => {
     default: return 5
   }
 }
+interface TideChartProps {
+  mode: 'VIEW' | 'EDIT' | null;
+}
 
-const TideChart = () => {
+const TideChart = (props: TideChartProps) => {
   const defaultDate = {
     from: subDays(new Date(), 5),
     to: new Date(),
@@ -64,12 +68,18 @@ const TideChart = () => {
   const [filteredData, setFilteredData] = useState<ChartDataItem[]>([])
   const [totalValue, setTotalValue] = useState(0)
 
+  const router = useRouter();
   const { data: sensorData, isLoading, error } = api.water.getWaterSensorData.useQuery<ChartDataItem[]>({
     from: date?.from ? startOfDay(date.from) : startOfDay(defaultDate.from),
     to: date?.to ? endOfDay(date.to) : endOfDay(defaultDate.to),
   }, {
     enabled: !!date?.from && !!date?.to, 
   })
+
+
+  const handleNavigateTidePage = () => {
+    router.push("/admin/tide");
+  };
 
     const processedData = useMemo(() => {
     if (!sensorData || !date?.from || !date?.to) return [];
@@ -111,13 +121,13 @@ const TideChart = () => {
   }, [processedData])
 
   return (
-    <Card className="w-full max-w-3xl">
+    <Card className="w-full max-w-3xl" >
       <CardHeader>
         <CardTitle>Tide Flow Chart</CardTitle>
         <CardDescription>Showing total value for the selected time interval</CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="mb-4 flex items-center gap-4">
+      <CardContent >
+        <div className={`mb-4 flex items-center gap-4 ${props?.mode == 'VIEW' && 'hidden'}`} >
           <Popover>
             <PopoverTrigger asChild>
               <Button
