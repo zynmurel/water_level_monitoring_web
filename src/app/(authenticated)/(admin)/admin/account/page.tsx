@@ -139,8 +139,8 @@ const SettingsPage = () => {
   return (
     <div className="grid w-full gap-2 xl:w-[700px]">
       <Button
-        onClick={() => {
-          axios.post(
+        onClick={async () => {
+          await axios.post(
             "http://192.168.43.219:3000/api/water-flow-sensor",
             {
               value: "100",
