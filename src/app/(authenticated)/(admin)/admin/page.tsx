@@ -8,7 +8,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import TideChart from "../_components/tide-chart";
 import WaterFlowChart from "./flow/chart-flow";
 import { useEffect, useState } from "react";
@@ -56,15 +56,16 @@ export default function Dashboard() {
       <h1 className="text-3xl font-bold">Dashboard</h1>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div onClick={handleNavigateTidePage}>
-          <TideChart mode={'VIEW'}/>
+          <TideChart mode={"VIEW"} />
         </div>
 
         <Card onClick={handleNavigateFlowPage}>
           <CardHeader>
             <CardTitle>Water Flow Chart</CardTitle>
             <CardDescription>
-              Displaying today's water flow data for real-time monitoring and
-              analysis.
+              {
+                "Displaying today's water flow data for real-time monitoring and analysis."
+              }
             </CardDescription>
           </CardHeader>
           <CardContent>

@@ -7,7 +7,7 @@ const Layout = ({ children }: { children: React.ReactElement }) => {
             Water Flow Chart
           </h3>
           <p className="text-sm text-muted-foreground">
-            Filter and view water flow chart's information.
+            {"Filter and view water flow chart's information."}
           </p>
         </div>
       </div>

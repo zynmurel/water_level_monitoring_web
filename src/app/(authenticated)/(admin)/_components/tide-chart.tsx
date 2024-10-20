@@ -2,14 +2,49 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { TrendingUp, CalendarIcon, Clock } from "lucide-react";
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+} from "recharts";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { format, isWithinInterval, addMinutes, startOfDay, endOfDay } from "date-fns";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  format,
+  isWithinInterval,
+  addMinutes,
+  startOfDay,
+  endOfDay,
+} from "date-fns";
 import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
@@ -20,7 +55,7 @@ export type ChartDataItem = {
   value: number;
   createdAt: Date;
   updatedAt: Date;
-  label: 'High' | 'Low';
+  label: "High" | "Low";
 };
 
 type TimeInterval = "5m" | "10m" | "15m" | "30m" | "1h" | "24h" | "1d";
@@ -34,19 +69,27 @@ const chartConfig = {
 
 const getIntervalMinutes = (interval: TimeInterval): number => {
   switch (interval) {
-    case "5m": return 5;
-    case "10m": return 10;
-    case "15m": return 15;
-    case "30m": return 30;
-    case "1h": return 60;
-    case "24h": return 24 * 60;
-    case "1d": return 24 * 60;
-    default: return 5;
+    case "5m":
+      return 5;
+    case "10m":
+      return 10;
+    case "15m":
+      return 15;
+    case "30m":
+      return 30;
+    case "1h":
+      return 60;
+    case "24h":
+      return 24 * 60;
+    case "1d":
+      return 24 * 60;
+    default:
+      return 5;
   }
 };
 
 interface TideChartProps {
-  mode: 'VIEW' | 'EDIT' | null;
+  mode: "VIEW" | "EDIT" | null;
 }
 
 const TideChart: React.FC<TideChartProps> = (props) => {
@@ -60,12 +103,19 @@ const TideChart: React.FC<TideChartProps> = (props) => {
   const [totalValue, setTotalValue] = useState(0);
 
   const router = useRouter();
-  const { data: sensorData, isLoading, error } = api.water.getWaterSensorData.useQuery<ChartDataItem[]>({
-    from: startOfDay(date?.from || defaultDate.from),
-    to: endOfDay(date?.to || defaultDate.to),
-  }, {
-    enabled: !!date?.from && !!date?.to,
-  });
+  const {
+    data: sensorData,
+    isLoading,
+    error,
+  } = api.water.getWaterSensorData.useQuery<ChartDataItem[]>(
+    {
+      from: startOfDay(date?.from || defaultDate.from),
+      to: endOfDay(date?.to || defaultDate.to),
+    },
+    {
+      enabled: !!date?.from && !!date?.to,
+    },
+  );
 
   const handleNavigateTidePage = () => {
     router.push("/admin/tide");
@@ -81,21 +131,23 @@ const TideChart: React.FC<TideChartProps> = (props) => {
 
     while (currentTime <= endTime) {
       const nextTime = addMinutes(currentTime, intervalMinutes);
-      const dataInInterval = sensorData.filter(item =>
+      const dataInInterval = sensorData.filter((item) =>
         isWithinInterval(new Date(item.createdAt), {
           start: currentTime,
-          end: nextTime
-        })
+          end: nextTime,
+        }),
       );
 
       if (dataInInterval.length > 0) {
-        const averageValue = dataInInterval.reduce((sum, item) => sum + item.value, 0) / dataInInterval.length;
+        const averageValue =
+          dataInInterval.reduce((sum, item) => sum + item.value, 0) /
+          dataInInterval.length;
         result.push({
           id: currentTime.getTime(),
           value: Number(averageValue.toFixed(2)),
           createdAt: new Date(currentTime),
           updatedAt: new Date(currentTime),
-          label: averageValue === 1 ? 'High' : 'Low'
+          label: averageValue === 1 ? "High" : "Low",
         });
       } else {
         result.push({
@@ -103,7 +155,7 @@ const TideChart: React.FC<TideChartProps> = (props) => {
           value: 0,
           createdAt: new Date(currentTime),
           updatedAt: new Date(currentTime),
-          label: 'Low'
+          label: "Low",
         });
       }
 
@@ -113,30 +165,30 @@ const TideChart: React.FC<TideChartProps> = (props) => {
     return result;
   }, [sensorData, date, timeInterval]);
   useEffect(() => {
-    setFilteredData(processedData)
-    const total = processedData.reduce((sum, item) => sum + item.value, 0)
-    setTotalValue(Number(total.toFixed(2)))
-  }, [processedData])
+    setFilteredData(processedData);
+    const total = processedData.reduce((sum, item) => sum + item.value, 0);
+    setTotalValue(Number(total.toFixed(2)));
+  }, [processedData]);
 
   return (
-    <Card className="w-full max-w-3xl" >
+    <Card className="w-full">
       <CardHeader>
         <CardTitle>Tide Flow Chart</CardTitle>
         <CardDescription>
-          {
-            props.mode == 'VIEW' ? "Displaying today's tide status for real-time monitoring and analysis."
-            : "Showing total value for the selected time interval"
-          }
+          {props.mode == "VIEW"
+            ? "Displaying today's tide status for real-time monitoring and analysis."
+            : "Showing total value for the selected time interval"}
         </CardDescription>
       </CardHeader>
-      <CardContent >
-        {
-          props?.mode == 'VIEW' && 
+      <CardContent>
+        {props?.mode == "VIEW" && (
           <div className="pb-5 text-xl font-bold text-blue-500">
-              {format(new Date(), "PPPP")}
-            </div>
-        }
-        <div className={`mb-4 flex items-center gap-4 ${props?.mode == 'VIEW' && 'hidden'}`} >
+            {format(new Date(), "PPPP")}
+          </div>
+        )}
+        <div
+          className={`mb-4 flex items-center gap-4 ${props?.mode == "VIEW" && "hidden"}`}
+        >
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -144,7 +196,7 @@ const TideChart: React.FC<TideChartProps> = (props) => {
                 variant={"outline"}
                 className={cn(
                   "w-[300px] justify-start text-left font-normal",
-                  !date && "text-muted-foreground"
+                  !date && "text-muted-foreground",
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
@@ -199,19 +251,20 @@ const TideChart: React.FC<TideChartProps> = (props) => {
               <XAxis
                 dataKey="createdAt"
                 tickFormatter={(value: string | number | Date) => {
-                  const dateValue = (typeof value === 'string' || typeof value === 'number') ? new Date(value) : value;
+                  const dateValue =
+                    typeof value === "string" || typeof value === "number"
+                      ? new Date(value)
+                      : value;
                   return format(dateValue, "hh:mm a");
                 }}
               />
               <YAxis
                 tickFormatter={(value) => {
-                  return value > 0 ? 'High' : 'Low';
+                  return value > 0 ? "High" : "Low";
                 }}
                 tickCount={2}
               />
-              <ChartTooltip
-                content={<ChartTooltipContent />}
-              />
+              <ChartTooltip content={<ChartTooltipContent />} />
               <Area
                 type="monotone"
                 dataKey="value"
@@ -227,7 +280,8 @@ const TideChart: React.FC<TideChartProps> = (props) => {
         <div className="flex w-full items-start gap-2 text-sm">
           <div className="grid gap-2">
             <div className="flex items-center gap-2 font-medium leading-none">
-              Total value: {totalValue.toLocaleString()} <TrendingUp className="h-4 w-4" />
+              Total value: {totalValue.toLocaleString()}{" "}
+              <TrendingUp className="h-4 w-4" />
             </div>
             <div className="flex items-center gap-2 leading-none text-muted-foreground">
               <Clock className="h-4 w-4" />
@@ -247,7 +301,7 @@ const TideChart: React.FC<TideChartProps> = (props) => {
 };
 
 const CustomTooltipContent = ({ payload, label }: any) => {
-  if (payload && payload.length) {
+  if (payload?.length) {
     return (
       <div className="p-2">
         <p className="text-sm font-bold">{`Date: ${format(label || new Date(), "PPP hh:mm aaa")}`}</p>

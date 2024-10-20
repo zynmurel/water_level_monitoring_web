@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import {
   ChartConfig,
   ChartContainer,
@@ -30,14 +31,14 @@ const WaterFlowChart = ({
           top: 0,
           right: 0,
           left: 0,
-          bottom: 50,
+          bottom: 0,
         }}
       >
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           dataKey={"createdAt"}
           tickFormatter={(value) => format(parseISO(value), "hh:mm aaa")}
-          tickSize={10}
+          // tickSize={10}
         />
         <YAxis />
         <ChartTooltip content={<CustomTooltipContent />} />
@@ -54,7 +55,7 @@ const WaterFlowChart = ({
 };
 
 const CustomTooltipContent = ({ payload, label }: any) => {
-  if (payload && payload.length) {
+  if (payload?.length) {
     return (
       <div className="p-2">
         <p className="text-sm font-bold">{`Date: ${format(label || new Date(), "PPP hh:mm aaa")}`}</p>

@@ -70,7 +70,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className="hidden md:block">
           <SideNavigation routes={routes} />
         </div>
-        <div className="flex flex-col">
+        <div className="flex max-h-screen flex-col">
           <header className="flex h-14 items-center gap-4 border-b px-4 lg:h-[60px] lg:px-6">
             <MobileNavigation routes={routes} />
             <div className="w-full flex-1"></div>
@@ -99,7 +99,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </DropdownMenu>
             </div>
           </header>
-          <main className="flex flex-1 flex-col gap-4 bg-muted/80 bg-sky-50 p-4 dark:bg-muted/30 lg:gap-4 lg:p-6 xl:px-10">
+          <main
+            className="flex flex-1 flex-col gap-4 overflow-hidden bg-muted/80 bg-sky-50 p-4 dark:bg-muted/30 lg:gap-4 lg:p-6 xl:px-10"
+            style={{ maxHeight: "95vh", overflow: "scroll" }}
+          >
             {children}
           </main>
         </div>

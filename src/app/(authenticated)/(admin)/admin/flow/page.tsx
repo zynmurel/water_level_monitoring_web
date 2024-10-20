@@ -1,15 +1,7 @@
 "use client";
-
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import { useState, useEffect } from "react";
-import { TrendingUp, CalendarIcon, Clock } from "lucide-react";
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  ResponsiveContainer,
-} from "recharts";
+import { CalendarIcon, Clock } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -18,12 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -38,18 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  addMinutes,
-  format,
-  isWithinInterval,
-  parseISO,
-  subMinutes,
-  subHours,
-  subDays,
-  startOfDay,
-  endOfDay,
-} from "date-fns";
-import { DateRange } from "react-day-picker";
+import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import WaterFlowChart from "./chart-flow";
