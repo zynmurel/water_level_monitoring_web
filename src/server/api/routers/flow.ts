@@ -65,9 +65,14 @@ const datas:{
 
   }),
   clearWaterflowDate : publicProcedure.mutation(async ({ ctx }) => {
-    return ctx.db.waterFlowSensor.deleteMany()
+    return ctx.db.waterFlowSensor.deleteMany({
+
+    })
   }),
   clearWatertideDate : publicProcedure.mutation(async ({ ctx }) => {
-    return ctx.db.floatSensor.deleteMany({})
+    console.log("dat delete")
+    return ctx.db.floatSensor.deleteMany({
+      
+    })
   }),
 });

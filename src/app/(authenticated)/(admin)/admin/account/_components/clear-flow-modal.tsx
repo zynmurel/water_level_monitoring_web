@@ -22,7 +22,7 @@ export default function ClearWaterFlowModal({
   setOpen: Dispatch<SetStateAction<boolean>>;
 }) {
   const { mutateAsync: clearWaterTide, isPending } =
-    api.waterFlow.clearWaterflowDate.useMutation({
+    api.waterFlow.clearWatertideDate.useMutation({
       onSuccess: () => {
         setOpen(false);
         toast({

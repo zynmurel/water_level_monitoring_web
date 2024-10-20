@@ -21,8 +21,8 @@ export default function ClearWaterTideModal({
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
 }) {
-  const { mutateAsync: clearWaterTide, isPending } =
-    api.waterFlow.clearWatertideDate.useMutation({
+  const { mutateAsync: clearWaterflow, isPending } =
+    api.waterFlow.clearWaterflowDate.useMutation({
       onSuccess: () => {
         setOpen(false);
         toast({
@@ -41,7 +41,7 @@ export default function ClearWaterTideModal({
           </DialogDescription>
         </DialogHeader>
         <Button
-          onClick={() => clearWaterTide()}
+          onClick={() => clearWaterflow()}
           className="px-20"
           variant={"destructive"}
           disabled={isPending}

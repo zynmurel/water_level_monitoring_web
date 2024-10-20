@@ -212,7 +212,11 @@ const TideChart: React.FC<TideChartProps> = (props) => {
                 initialFocus
                 mode="single"
                 selected={date?.from}
-                onSelect={(date) => setDate({ from: date, to: date })}
+                onSelect={(date) => {
+                  if (date) {
+                    setDate({ from: startOfDay(date), to: endOfDay(date) });
+                  }
+                }}
               />
             </PopoverContent>
           </Popover>
