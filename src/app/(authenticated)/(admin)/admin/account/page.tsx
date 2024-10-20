@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import { toast } from "@/hooks/use-toast";
 import Loading from "./_components/loading";
 import ClearWaterFlowModal from "./_components/clear-flow-modal";
+import axios from "axios";
 
 const SettingsPage = () => {
   const { user } = useStore();
@@ -137,6 +138,23 @@ const SettingsPage = () => {
   }, [settings]);
   return (
     <div className="grid w-full gap-2 xl:w-[700px]">
+      <Button
+        onClick={() => {
+          axios.post(
+            "http://192.168.43.219:3000/api/water-flow-sensor",
+            {
+              value: "100",
+            },
+            {
+              headers: {
+                "Content-Type": "application/json",
+              },
+            },
+          );
+        }}
+      >
+        try
+      </Button>
       <div className="flex flex-col">
         <h3 className="text-2xl font-bold tracking-tight">Account</h3>
         <p className="text-sm text-muted-foreground">
