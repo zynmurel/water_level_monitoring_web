@@ -5,7 +5,7 @@ export type Payload = {
     value: string
 }
 
-export async function POST (request: NextRequest){
+export async function POST(request: NextRequest){
     try {
         console.log("trigerr me", request.method)
         const headers = new Headers({

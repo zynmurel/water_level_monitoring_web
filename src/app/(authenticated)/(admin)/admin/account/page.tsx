@@ -140,16 +140,15 @@ const SettingsPage = () => {
     <div className="grid w-full gap-2 xl:w-[700px]">
       <Button
         onClick={async () => {
-          await axios.post(
-            "https://water-level-monitoring-web.vercel.app/api/water-flow-sensor",{
-              value: "100",
-            },
-            {
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            }
-          );
+            await fetch('https://water-level-monitoring-web.vercel.app/api/water-flow-sensor', {
+                method: 'POST', // HTTP method
+                headers: {
+                  'Content-Type': 'application/json', // Specify JSON format
+                },
+                body: JSON.stringify({
+                    value: "100",
+                  }), // Convert the data to a JSON string
+              })
         }}
       >
         try
