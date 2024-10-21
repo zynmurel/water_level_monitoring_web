@@ -7,6 +7,7 @@ export type Payload = {
 
 export async function POST (request: NextRequest){
     try {
+        console.log("trigerr me")
         const headers = new Headers({
             'Access-Control-Allow-Origin': '*', // Allow all origins or replace '*' with your frontend's URL
             'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
