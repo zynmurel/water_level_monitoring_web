@@ -5,7 +5,16 @@ import {type NextRequest, NextResponse} from "next/server";
 export type Payload = {
     value: string
 }
-
+export async function OPTIONS(req: NextRequest) {
+    const headers = new Headers({
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Allow-Origin': '*', // You can replace '*' with your allowed origin
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    });
+  
+    return new NextResponse(null, { headers });
+  }
 export async function POST(request: NextRequest){
     try {
         console.log("trigerr me", request.method)
