@@ -141,7 +141,7 @@ const SettingsPage = () => {
       <Button
         onClick={async () => {
           await axios.post(
-            "http://192.168.43.219:3000/api/water-flow-sensor",
+            "http://localhost:3000/api/water-flow-sensor",
             {
               value: "100",
             },
