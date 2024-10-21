@@ -14,7 +14,11 @@ export async function POST(request: NextRequest) {
                 value: parseFloat(!Number.isNaN(payload.value) ? payload.value : '0')
             }
         })
-        return NextResponse.json(data);
+        const response =  NextResponse.json(data);
+        response.headers.set('Access-Control-Allow-Origin', '*');
+        response.headers.set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+        response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+        return response
     } catch (error) {
         return NextResponse.json(
             { error: error, },

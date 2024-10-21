@@ -141,7 +141,7 @@ const SettingsPage = () => {
       <Button
         onClick={async () => {
           await axios.post(
-            "http://localhost:3000/api/water-flow-sensor",
+            "https://water-level-monitoring-web.vercel.app/api/water-flow-sensor",
             {
               value: "100",
             },
