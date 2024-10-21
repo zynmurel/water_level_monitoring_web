@@ -138,23 +138,23 @@ const SettingsPage = () => {
   }, [settings]);
   return (
     <div className="grid w-full gap-2 xl:w-[700px]">
-      <Button
+      {/* <Button
         onClick={async () => {
           await axios.post(
-            "https://water-level-monitoring-web.vercel.app/api/water-flow-sensor",
-            {
+            "/api/water-flow-sensor",
+            JSON.stringify({
               value: "100",
-            },
+            }),
             {
               headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json',
               },
-            },
+            }
           );
         }}
       >
         try
-      </Button>
+      </Button> */}
       <div className="flex flex-col">
         <h3 className="text-2xl font-bold tracking-tight">Account</h3>
         <p className="text-sm text-muted-foreground">

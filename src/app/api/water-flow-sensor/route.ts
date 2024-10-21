@@ -7,7 +7,7 @@ export type Payload = {
 
 export async function POST(request: NextRequest) {
     const payload = await request.json() as Payload
-    console.log(payload, "hereeee")
+    console.log(payload, "hereeee2")
     try {
         const data = await db.waterFlowSensor.create({
             data: {
@@ -15,6 +15,7 @@ export async function POST(request: NextRequest) {
             }
         })
         const response =  NextResponse.json(data);
+        console.log(response,"here")
         response.headers.set('Access-Control-Allow-Origin', '*');
         response.headers.set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
         response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
