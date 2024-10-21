@@ -1,6 +1,6 @@
 
 import {type NextRequest, NextResponse} from "next/server";
-
+import { db } from "@/server/db";
 export type Payload = {
     value: string
 }
@@ -9,18 +9,18 @@ export async function POST (request: NextRequest){
     try {
         console.log("trigerr me")
         const headers = new Headers({
-            'Access-Control-Allow-Origin': '*', // Allow all origins or replace '*' with your frontend's URL
+            'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
             'Access-Control-Allow-Headers': 'Content-Type',
         });
         if (request.method === 'OPTIONS') {
-            // Preflight response for CORS
             return new NextResponse(null, { headers });
         }
         const payload  = await request.json() as {value:string}
 
-        // Example database interaction
-        const data = { value: parseFloat(payload.value) };
+        const data = await db.floatSensor.create({
+            data : { value: Number.isNaN(parseFloat(payload.value)) ? 0 : parseFloat(payload.value) }
+        })
 
         return new NextResponse(JSON.stringify(data), { headers });
 
