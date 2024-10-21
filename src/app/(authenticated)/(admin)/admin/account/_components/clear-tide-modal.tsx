@@ -21,12 +21,12 @@ export default function ClearWaterTideModal({
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
 }) {
-  const { mutateAsync: clearWaterflow, isPending } =
-    api.waterFlow.clearWaterflowDate.useMutation({
+  const { mutateAsync: clearWaterTide, isPending } =
+    api.waterFlow.clearWatertideDate.useMutation({
       onSuccess: () => {
         setOpen(false);
         toast({
-          title: "Water Flow datas cleared",
+          title: "Water Tide datas cleared",
         });
       },
     });
@@ -34,19 +34,19 @@ export default function ClearWaterTideModal({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Clear Water Flow Data</DialogTitle>
+          <DialogTitle>Clear Water Tide Level Data</DialogTitle>
           <DialogDescription>
-            Once confirmed, all water flow data will be permanently deleted, and
-            the system will reset to allow new measurements to be recorded.
+            Upon confirmation, all recorded tide level data will be permanently
+            erased, and the system will be ready for new data entries.
           </DialogDescription>
         </DialogHeader>
         <Button
-          onClick={() => clearWaterflow()}
+          onClick={() => clearWaterTide()}
           className="px-20"
           variant={"destructive"}
           disabled={isPending}
         >
-          Clear Water Flow Data
+          Clear Water Tide Level Data
         </Button>
       </DialogContent>
     </Dialog>

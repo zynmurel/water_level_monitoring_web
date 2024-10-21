@@ -14,8 +14,9 @@ import { useStore } from "@/lib/store/app";
 import { useEffect, useState } from "react";
 import { toast } from "@/hooks/use-toast";
 import Loading from "./_components/loading";
-import ClearWaterFlowModal from "./_components/clear-flow-modal";
 import axios from "axios";
+import ClearWaterFlowModal from "./_components/clear-flow-modal";
+import ClearWaterTideModal from "./_components/clear-tide-modal";
 
 const SettingsPage = () => {
   const { user } = useStore();
@@ -437,7 +438,7 @@ const SettingsPage = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-center">
-            <ClearWaterFlowModal
+            <ClearWaterTideModal
               open={openClearTide}
               setOpen={setOpenClearTide}
             />
