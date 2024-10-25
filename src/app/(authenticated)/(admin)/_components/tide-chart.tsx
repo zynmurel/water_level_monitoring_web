@@ -147,7 +147,7 @@ const TideChart: React.FC<TideChartProps> = (props) => {
           value: Number(averageValue.toFixed(2)),
           createdAt: new Date(currentTime),
           updatedAt: new Date(currentTime),
-          label: averageValue === 1 ? "High" : "Low",
+          label: averageValue > 0 ? "High" : "Low",
         });
       } else {
         result.push({
