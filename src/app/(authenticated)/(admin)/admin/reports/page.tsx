@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { format, startOfDay, endOfDay } from 'date-fns'
-import { CalendarIcon, ChevronsDown } from 'lucide-react'
+import { CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
@@ -27,9 +27,11 @@ interface WaterSensorDataItem {
 
 type TimeInterval = '5m' | '10m' | '15m' | '30m' | '1h'
 
-export default function WaterDataDisplay() {
+export default function Component() {
   const [date, setDate] = useState<Date>(new Date())
   const [timeInterval, setTimeInterval] = useState<TimeInterval>('1h')
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const itemsPerPage = 10
 
   const { data: waterFlowData, isLoading: isLoadingWaterFlow } = api.waterFlow.getWaterFlowByInterval.useQuery<WaterFlowDataItem[]>(
     {
@@ -60,8 +62,8 @@ export default function WaterDataDisplay() {
   const isLoading = isLoadingWaterFlow || isLoadingSensorData
 
   const getTideStatus = (value: number | null): 'High' | 'Low' => {
-    if (value === null || value === undefined) return 'Low';
-    return value > 0 ? 'High' : 'Low';
+    if (value === null || value === undefined) return 'Low'
+    return value > 0 ? 'High' : 'Low'
   }
 
   const displayTide = (): JSX.Element[] => {
@@ -98,7 +100,11 @@ export default function WaterDataDisplay() {
 
     combinedData.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
 
-    return combinedData.map((item) => (
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const paginatedData = combinedData.slice(startIndex, endIndex)
+
+    return paginatedData.map((item) => (
       <TableRow key={item.id}>
         <TableCell>{format(new Date(item.createdAt), 'HH:mm:ss')}</TableCell>
         <TableCell>
@@ -109,8 +115,8 @@ export default function WaterDataDisplay() {
       </TableRow>
     ))
   }
-  
-  
+
+  const totalPages = Math.ceil((waterFlowData?.length || 0) / itemsPerPage)
 
   return (
     <Card className="w-full">
@@ -154,18 +160,37 @@ export default function WaterDataDisplay() {
               <SelectItem value="1h">Every 1 hour</SelectItem>
             </SelectContent>
           </Select>
+          <div className='md:ml-auto flex gap-4 justify-center items-center text-center'>
+          <Button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <span className="sr-only">Previous page</span>
+          </Button>
+          <span>
+            Page {currentPage} of {totalPages}
+          </span>
+          <Button
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            <ChevronRight className="h-4 w-4" />
+            <span className="sr-only">Next page</span>
+          </Button>
+          </div>
         </div>
 
         {isLoading ? (
           <div className="text-center">Loading data...</div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2">
-            <Card>
+            <Card >
               <CardHeader>
                 <CardTitle>Water Flow Data</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
+                <div>
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -174,7 +199,7 @@ export default function WaterDataDisplay() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {waterFlowData?.map((item) => (
+                      {waterFlowData?.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((item) => (
                         <TableRow key={item.id}>
                           <TableCell>{format(new Date(item.createdAt), 'HH:mm:ss')}</TableCell>
                           <TableCell>{item.value.toFixed(2)}</TableCell>
@@ -191,7 +216,7 @@ export default function WaterDataDisplay() {
                 <CardTitle>Tide Data</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
+                <div >
                   <Table>
                     <TableHeader>
                       <TableRow>
