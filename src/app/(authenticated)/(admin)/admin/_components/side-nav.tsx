@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { Droplets, Package2 } from "lucide-react";
+import { Droplets } from "lucide-react";
 
 import { usePathname } from "next/navigation";
 import { useStore } from "@/lib/store/app";

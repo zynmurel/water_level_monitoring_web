@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -9,7 +10,6 @@ import {
   XAxis,
   YAxis,
   ResponsiveContainer,
-  Dot,
 } from "recharts";
 import {
   Card,
@@ -20,10 +20,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  ChartConfig,
+  type ChartConfig,
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
