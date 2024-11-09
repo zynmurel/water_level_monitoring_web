@@ -56,7 +56,7 @@ getWaterSensorData: publicProcedure
         throw new Error("The 'from' date must be less than or equal to the 'to' date.");
       }
 
-      return ctx.db.waterFlowSensor.findMany({
+      const data = await ctx.db.waterFlowSensor.findMany({
         where: {
           createdAt: {
             lte: input.to,
@@ -66,6 +66,14 @@ getWaterSensorData: publicProcedure
         orderBy: {
           createdAt: 'asc',
         },
-      });
+      }).then(data=>{
+        return data.map(d=>({
+          ...d,
+          createdAt: d.createdAt.toISOString(),
+          updatedAt: d.updatedAt.toISOString(),
+        }))
+      })
+      console.log(data)
+      return data;
     }),
 });

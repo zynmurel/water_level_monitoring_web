@@ -21,8 +21,8 @@ interface WaterFlowDataItem {
 interface WaterSensorDataItem {
   id: number
   value: number
-  createdAt: Date
-  updatedAt: Date
+  createdAt: string
+  updatedAt: string
 }
 
 type TimeInterval = '5m' | '10m' | '15m' | '30m' | '1h'

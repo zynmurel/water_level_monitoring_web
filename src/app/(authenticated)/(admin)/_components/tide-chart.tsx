@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
   ResponsiveContainer,
+  Dot,
 } from "recharts";
 import {
   Card,
@@ -44,6 +45,9 @@ import {
   addMinutes,
   startOfDay,
   endOfDay,
+  parseISO,
+  setHours,
+  setMinutes,
 } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
@@ -53,8 +57,8 @@ import { useRouter } from "next/navigation";
 export type ChartDataItem = {
   id: number;
   value: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   label: "High" | "Low";
 };
 
@@ -126,18 +130,24 @@ const TideChart: React.FC<TideChartProps> = (props) => {
 
     const intervalMinutes = getIntervalMinutes(timeInterval);
     const result: ChartDataItem[] = [];
-    let currentTime = startOfDay(date.from);
+    let currentTime = setMinutes(setHours(startOfDay(new Date(date.from)), 0), 0); // Start at 12 AM
     const endTime = endOfDay(date.to);
-
+    result.push({
+      id: currentTime.getTime(),
+      value: 0,
+      createdAt: currentTime.toISOString(),
+      updatedAt: currentTime.toISOString(),
+      label: "Low", 
+    });
     while (currentTime <= endTime) {
       const nextTime = addMinutes(currentTime, intervalMinutes);
       const dataInInterval = sensorData.filter((item) =>
-        isWithinInterval(new Date(item.createdAt), {
+        isWithinInterval(parseISO(item.createdAt), {
           start: currentTime,
           end: nextTime,
         }),
       );
-
+      
       if (dataInInterval.length > 0) {
         const averageValue =
           dataInInterval.reduce((sum, item) => sum + item.value, 0) /
@@ -145,25 +155,25 @@ const TideChart: React.FC<TideChartProps> = (props) => {
         result.push({
           id: currentTime.getTime(),
           value: Number(averageValue.toFixed(2)),
-          createdAt: new Date(currentTime),
-          updatedAt: new Date(currentTime),
+          createdAt: currentTime.toISOString(),
+          updatedAt: currentTime.toISOString(),
           label: averageValue > 0 ? "High" : "Low",
         });
       } else {
         result.push({
           id: currentTime.getTime(),
           value: 0,
-          createdAt: new Date(currentTime),
-          updatedAt: new Date(currentTime),
+          createdAt: currentTime.toISOString(),
+          updatedAt: currentTime.toISOString(),
           label: "Low",
         });
       }
 
       currentTime = nextTime;
     }
-
     return result;
   }, [sensorData, date, timeInterval]);
+
   useEffect(() => {
     setFilteredData(processedData);
     const total = processedData.reduce((sum, item) => sum + item.value, 0);
@@ -248,19 +258,13 @@ const TideChart: React.FC<TideChartProps> = (props) => {
                 left: 0,
                 bottom: 0,
               }}
+              
             >
               <CartesianGrid strokeDasharray="3 3" />
               <ChartTooltip content={<CustomTooltipContent />} />
-
               <XAxis
-                dataKey="createdAt"
-                tickFormatter={(value: string | number | Date) => {
-                  const dateValue =
-                    typeof value === "string" || typeof value === "number"
-                      ? new Date(value)
-                      : value;
-                  return format(dateValue, "hh:mm a");
-                }}
+                dataKey={"createdAt"}
+                tickFormatter={(value:string) => format(parseISO(value), "hh:mm aaa")}
               />
               <YAxis
                 tickFormatter={(value) => {
@@ -268,7 +272,6 @@ const TideChart: React.FC<TideChartProps> = (props) => {
                 }}
                 tickCount={2}
               />
-              <ChartTooltip content={<ChartTooltipContent />} />
               <Area
                 type="monotone"
                 dataKey="value"
@@ -308,7 +311,7 @@ const CustomTooltipContent = ({ payload, label }: any) => {
   if (payload?.length) {
     return (
       <div className="p-2">
-        <p className="text-sm font-bold">{`Date: ${format(label || new Date(), "PPP hh:mm aaa")}`}</p>
+        <p className="text-sm font-bold">{`Date: ${format(parseISO(label), "PPP hh:mm aaa")}`}</p>
         <p className="text-sm font-bold text-blue-500">{`${payload[0].payload.label}`}</p>
       </div>
     );
