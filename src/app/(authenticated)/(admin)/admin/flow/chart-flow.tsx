@@ -59,7 +59,7 @@ const CustomTooltipContent = ({ payload, label }: any) => {
     return (
       <div className="p-2">
         <p className="text-sm font-bold">{`Date: ${format(label || new Date(), "PPP hh:mm aaa")}`}</p>
-        <p className="text-sm font-bold text-blue-500">{`${payload[0].value.toFixed(2)} liter/min`}</p>
+        <p className="text-sm font-bold text-blue-500">{`${payload[0].value.toFixed(2)} meter/hour`}</p>
       </div>
     );
   }

@@ -130,8 +130,8 @@ export default function ValueOverTimeChart() {
         <div className="flex w-full items-start gap-2 text-sm">
           <div className="grid gap-2">
             <div className="flex items-center gap-2 font-medium leading-none">
-              Average : {(totalValue / filteredData.length).toLocaleString()}{" "}
-              {/* <TrendingUp className="h-4 w-4" /> */}Liter per Minute
+              Average : {totalValue ? (totalValue / filteredData.length).toLocaleString() : "0"}{" "}
+              {/* <TrendingUp className="h-4 w-4" /> */}Meter per Hour
             </div>
             <div className="flex items-center gap-2 leading-none text-muted-foreground">
               <Clock className="h-4 w-4" />
